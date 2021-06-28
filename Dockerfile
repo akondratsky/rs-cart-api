@@ -18,7 +18,7 @@ COPY --from=dependencies /app/package*.json ./
 COPY --from=build /app/dist ./
 RUN npm install --only=production
 
-FROM alpine:latest as base
+FROM base as release
 WORKDIR /app
 RUN apk add --update --no-cache nodejs
 COPY --from=prerelease app ./
