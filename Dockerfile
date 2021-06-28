@@ -1,27 +1,30 @@
 FROM alpine:latest as base
-WORKDIR /app
-RUN apk add --update --no-cache nodejs npm
+RUN apk add --update --no-cache nodejs
 
-FROM base as dependencies
+FROM alpine:latest as npmbase
+RUN apk add --update --no-cache npm
+
+# prepare node_modules
+FROM npmbase as dependencies
 WORKDIR /app
 COPY package*.json ./
 RUN npm install && npm cache clean --force
 
+# let's create normal build
 FROM dependencies as build
 WORKDIR /app
 COPY . /app
 RUN npm run build
 
-FROM base as prerelease
+FROM npmbase as releasebuild
 WORKDIR /app
-COPY --from=dependencies /app/package*.json ./
-COPY --from=build /app/dist ./
+COPY --from=build /app/package*.json ./
 RUN npm install --only=production
+COPY --from=build /app/dist ./
 
-FROM alpine:latest as base
+FROM npmbase as release
 WORKDIR /app
-RUN apk add --update --no-cache nodejs
-COPY --from=prerelease app ./
+COPY --from=releasebuild /app ./
 
 EXPOSE 4000
 
