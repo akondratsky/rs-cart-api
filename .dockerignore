@@ -1,0 +1,9 @@
+node_modules
+# let's ignore this folder and copy only what we exactly need
+dist
+# we don't need these guys to run our application:
+**/*.d.ts
+**/*.js.map
+# no need to save files related to docker itself:
+.dockerignore
+Dockerfile
